@@ -28,11 +28,10 @@ _ha_fetch() {
   git fetch --all --prune --quiet
 }
 
-# Internal: run hook if exists (sourced in current shell context)
-# Note: Use 'return' instead of 'exit' in hooks to avoid closing the shell
+# Internal: run hook if exists (in subshell)
 _ha_exec_hook() {
   local hook_file="$(_ha_base_path)/.ha/hooks/$1"
-  [[ -f "$hook_file" ]] && source "$hook_file"
+  [[ -f "$hook_file" ]] && ( source "$hook_file" )
 }
 
 # Main entry point
@@ -319,7 +318,7 @@ ha-gone() {
   done
 }
 
-# Run hook manually
+# Run hook manually (in subshell)
 ha-invoke() {
   local hook_name="$1"
   if [[ -z "$hook_name" ]]; then
@@ -333,7 +332,7 @@ ha-invoke() {
     return 1
   fi
 
-  source "$hook_file"
+  ( source "$hook_file" )
 }
 
 # Completion

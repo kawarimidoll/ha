@@ -50,9 +50,6 @@ ha link .claude
 npm install
 ```
 
-> **Note:** Hooks are sourced in the current shell context, so `ha` commands work directly.
-> Use `return` instead of `exit` to avoid closing your terminal.
-
 ## Installation
 
 ### Sheldon (zsh)
