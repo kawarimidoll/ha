@@ -39,15 +39,28 @@ ha del              # Delete worktree and branch
 /path/to/repo@feat/x   # Nested branch names supported
 ```
 
-## Configuration
+## Hooks
 
 Per-repository hooks in `.ha/hooks/`:
 
+| Hook | Timing |
+|------|--------|
+| `pre-new` | Before `ha new` |
+| `post-new` | After `ha new` |
+| `pre-get` | Before `ha get` |
+| `post-get` | After `ha get` |
+| `pre-extract` | Before `ha extract` |
+| `post-extract` | After `ha extract` |
+| `pre-del` | Before `ha del` |
+| `pre-mv` | Before `ha mv` |
+
+Pre-hooks can abort the command by exiting with non-zero status.
+
 ```bash
 # .ha/hooks/post-new
-ha link .env
+ha link .envrc
 ha link .claude
-npm install
+direnv allow .
 ```
 
 ## Installation
