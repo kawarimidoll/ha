@@ -52,6 +52,7 @@ ha() {
     ls)      ha-ls "$@" ;;
     copy)    ha-copy "$@" ;;
     link)    ha-link "$@" ;;
+    invoke)  ha-invoke "$@" ;;
     *)
       cat <<'EOF'
 Usage: ha <command> [args]
@@ -69,6 +70,7 @@ Commands:
   ls            List worktrees
   copy <path>   Copy file/dir from base to current worktree
   link <path>   Symlink file/dir from base to current worktree
+  invoke <hook> Run hook manually
 EOF
       return 1
       ;;
@@ -317,6 +319,23 @@ ha-gone() {
   done
 }
 
+# Run hook manually
+ha-invoke() {
+  local hook_name="$1"
+  if [[ -z "$hook_name" ]]; then
+    echo "Usage: ha invoke <hook>" >&2
+    return 1
+  fi
+
+  local hook_file="$(_ha_base_path)/.ha/hooks/$hook_name"
+  if [[ ! -f "$hook_file" ]]; then
+    echo "Error: Hook '$hook_name' does not exist" >&2
+    return 1
+  fi
+
+  source "$hook_file"
+}
+
 # Completion
 if [[ -n "$ZSH_VERSION" ]]; then
   _ha() {
@@ -334,6 +353,7 @@ if [[ -n "$ZSH_VERSION" ]]; then
       'ls:List worktrees'
       'copy:Copy file/dir from base'
       'link:Symlink file/dir from base'
+      'invoke:Run hook manually'
     )
     _describe 'command' commands
   }
@@ -342,7 +362,7 @@ if [[ -n "$ZSH_VERSION" ]]; then
 elif [[ -n "$BASH_VERSION" ]]; then
   _ha() {
     local cur="${COMP_WORDS[COMP_CWORD]}"
-    local commands="new get extract mv del cd home use gone ls copy link"
+    local commands="new get extract mv del cd home use gone ls copy link invoke"
     COMPREPLY=($(compgen -W "$commands" -- "$cur"))
   }
   complete -F _ha ha

@@ -18,6 +18,7 @@ Git Worktree Manager - Simple shell functions for managing git worktrees.
 | `ha ls` | List worktrees |
 | `ha copy <path>` | Copy file/dir from base to current worktree |
 | `ha link <path>` | Symlink file/dir from base to current worktree |
+| `ha invoke <hook>` | Run hook manually |
 
 ## Workflow
 
