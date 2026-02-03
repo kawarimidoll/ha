@@ -1,0 +1,2 @@
+# ha
+Git Worktree Manager
