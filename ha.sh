@@ -224,11 +224,13 @@ ha-del() {
 # Select worktree with fzf and cd
 ha-cd() {
   local selected
-  selected=$(git worktree list | fzf --no-multi --exit-0 \
-    --preview="git -C {1} log -5 --oneline --decorate")
+  # Format: "branch /path/to/worktree"
+  selected=$(git worktree list | awk '{gsub(/\[|\]/, "", $3); print $3, $1}' | \
+    fzf --no-multi --exit-0 --with-nth=1 \
+      --preview="git -C {2} log -15 --oneline --decorate")
 
   if [[ -n "$selected" ]]; then
-    cd "$(echo "$selected" | awk '{print $1}')" || return 1
+    cd "$(echo "$selected" | awk '{print $2}')" || return 1
   fi
 }
 
