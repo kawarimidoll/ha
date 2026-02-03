@@ -56,6 +56,17 @@ Per-repository hooks in `.ha/hooks/`:
 
 Pre-hooks can abort the command by exiting with non-zero status.
 
+Hooks receive `HA_BRANCH` environment variable with the target branch name.
+(`ha invoke` does not set this automatically)
+
+```bash
+# .ha/hooks/pre-new
+if [[ ! "$HA_BRANCH" =~ ^(feat|fix|chore)/ ]]; then
+  echo "Invalid branch name: $HA_BRANCH"
+  exit 1
+fi
+```
+
 ```bash
 # .ha/hooks/post-new
 ha link .envrc

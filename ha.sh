@@ -93,7 +93,7 @@ ha-get() {
 
   local worktree_path="$(_ha_worktree_path "$branch_name")"
 
-  _ha_exec_hook pre-get || return 1
+  HA_BRANCH="$branch_name" _ha_exec_hook pre-get || return 1
   _ha_fetch || return 1
 
   # Check if remote branch exists
@@ -107,7 +107,7 @@ ha-get() {
 
   cd "$worktree_path" || return 1
 
-  _ha_exec_hook post-get
+  HA_BRANCH="$branch_name" _ha_exec_hook post-get
 }
 
 # Extract current branch to worktree (from base only)
@@ -122,7 +122,7 @@ ha-extract() {
 
   local worktree_path="$(_ha_worktree_path "$branch_name")"
 
-  _ha_exec_hook pre-extract || return 1
+  HA_BRANCH="$branch_name" _ha_exec_hook pre-extract || return 1
 
   # Move branch to worktree
   git worktree add "$worktree_path" "$branch_name" || return 1
@@ -132,7 +132,7 @@ ha-extract() {
 
   cd "$worktree_path" || return 1
 
-  _ha_exec_hook post-extract
+  HA_BRANCH="$branch_name" _ha_exec_hook post-extract
 }
 
 # Create new worktree + branch from remote-head
@@ -147,7 +147,7 @@ ha-new() {
 
   local worktree_path="$(_ha_worktree_path "$branch_name")"
 
-  _ha_exec_hook pre-new || return 1
+  HA_BRANCH="$branch_name" _ha_exec_hook pre-new || return 1
   _ha_fetch || return 1
 
   # Create worktree with detached HEAD
@@ -157,7 +157,7 @@ ha-new() {
   cd "$worktree_path" || return 1
   git switch --create "$branch_name" --no-track
 
-  _ha_exec_hook post-new
+  HA_BRANCH="$branch_name" _ha_exec_hook post-new
 }
 
 # Rename current worktree + branch
@@ -173,7 +173,7 @@ ha-mv() {
   local current_path="$(git rev-parse --show-toplevel)"
   local new_path="$(_ha_worktree_path "$new_name")"
 
-  _ha_exec_hook pre-mv || return 1
+  HA_BRANCH="$new_name" _ha_exec_hook pre-mv || return 1
 
   git branch -m "$new_name" || return 1
   git worktree move "$current_path" "$new_path" || return 1
@@ -194,7 +194,7 @@ ha-del() {
   local current_path="$(git rev-parse --show-toplevel)"
   local branch_name="$(git branch --show-current)"
 
-  _ha_exec_hook pre-del || return 1
+  HA_BRANCH="$branch_name" _ha_exec_hook pre-del || return 1
 
   if [[ "$force" == false ]]; then
     if [[ -n "$(git status --porcelain)" ]]; then
