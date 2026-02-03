@@ -31,6 +31,25 @@ git push -u origin fix-login
 ha del              # Delete worktree and branch
 ```
 
+## Tips
+
+### Using `ha use` with dev server
+
+When running dev servers in each worktree, you need to manage multiple ports (`:3000`, `:3001`, `:3002`...). Instead, run a single dev server in the base directory and use `ha use` to checkout changes from any worktree.
+
+```bash
+# In base: pnpm dev (keeps running on :3000)
+ha new feature-a    # Create worktree
+# ... work on feature-a ...
+ha use              # Checkout to base → see changes on :3000
+
+ha home && ha new feature-b
+# ... work on feature-b ...
+ha use              # Same URL :3000, different branch
+```
+
+This keeps your dev URL consistent regardless of which worktree you're working in.
+
 ## Worktree Path Convention
 
 ```
@@ -70,7 +89,7 @@ fi
 ```bash
 # .ha/hooks/post-new
 ha link .envrc
-ha link .claude
+ha copy .claude
 direnv allow .
 ```
 
@@ -82,9 +101,8 @@ direnv allow .
 [plugins.ha]
 github = "kawarimidoll/ha"
 use = ["ha.sh"]
-apply = ["defer"]
 hooks.post = '''
-zsh-defer compdef _ha ha
+compdef _ha ha
 '''
 ```
 
@@ -107,6 +125,15 @@ source /path/to/ha.sh
 - bash or zsh
 - git
 - fzf (for `ha cd`)
+
+## Similar Projects
+
+- https://github.com/k1LoW/git-wt
+- https://github.com/708u/twig
+- https://github.com/mateusauler/git-worktree-switcher
+- https://github.com/akiojin/gwt
+- https://github.com/johnlindquist/worktree-cli
+- https://github.com/coderabbitai/git-worktree-runner
 
 ## License
 
