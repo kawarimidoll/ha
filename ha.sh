@@ -224,13 +224,23 @@ ha-del() {
 # Select worktree with fzf and cd
 ha-cd() {
   local selected
-  # Format: "branch /path/to/worktree"
-  selected=$(git worktree list | awk '{gsub(/\[|\]/, "", $3); print $3, $1}' | \
-    fzf --no-multi --exit-0 --with-nth=1 \
+  # Format: "branch<TAB>/path/to/worktree"
+  # Extract branch from [...] or show "detached HEAD" for detached
+  selected=$(git worktree list | awk '
+    {
+      path = $1
+      if (match($0, /\[[^\]]+\]/)) {
+        branch = substr($0, RSTART+1, RLENGTH-2)
+      } else {
+        branch = "detached HEAD (" $2 ")"
+      }
+      print branch "\t" path
+    }
+  ' | fzf --no-multi --exit-0 -d '\t' --with-nth=1 \
       --preview="git -C {2} log -15 --oneline --decorate")
 
   if [[ -n "$selected" ]]; then
-    cd "$(echo "$selected" | awk '{print $2}')" || return 1
+    cd "$(echo "$selected" | cut -f2)" || return 1
   fi
 }
 
