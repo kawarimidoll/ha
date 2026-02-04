@@ -124,11 +124,11 @@ ha-extract() {
 
   HA_BRANCH="$branch_name" _ha_exec_hook pre-extract || return 1
 
-  # Move branch to worktree
-  git worktree add "$worktree_path" "$branch_name" || return 1
-
-  # Detach base to remote HEAD
+  # Detach base first to release the branch
   git checkout --detach "$(_ha_remote_head)" || return 1
+
+  # Then move branch to worktree
+  git worktree add "$worktree_path" "$branch_name" || return 1
 
   cd "$worktree_path" || return 1
 
