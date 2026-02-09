@@ -313,7 +313,7 @@ ha-gone() {
   _ha_fetch || return 1
 
   local gone_branches
-  gone_branches=$(git branch -vv | awk '/: gone]/{print $1}')
+  gone_branches=$(git branch -vv | cut -c3- | awk '/: gone]/{print $1}')
 
   if [[ -z "$gone_branches" ]]; then
     echo "No gone branches found"
