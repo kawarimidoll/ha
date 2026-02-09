@@ -324,11 +324,10 @@ ha-gone() {
   echo "$gone_branches"
   echo ""
 
-  local branch
-  for branch in $gone_branches; do
+  local branch worktree_path
+  while IFS= read -r branch; do
     # Resolve worktree path from branch name
-    local worktree_path
-    worktree_path=$(git worktree list | grep "\[$branch\]" | awk '{print $1}')
+    worktree_path=$(git worktree list | grep -F "[$branch]" | awk '{print $1}')
 
     if [[ -n "$worktree_path" ]]; then
       echo "Removing worktree: $worktree_path"
@@ -337,7 +336,7 @@ ha-gone() {
 
     echo "Deleting branch: $branch"
     git branch -d "$branch"
-  done
+  done <<< "$gone_branches"
 }
 
 # Run hook manually (in subshell)
