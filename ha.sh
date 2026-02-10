@@ -3,6 +3,8 @@
 # Usage: source this file from your shell rc
 # Compatible with bash and zsh
 
+HA_VERSION="2026.02.10"
+
 # Internal: get base worktree path
 _ha_base_path() {
   git worktree list | head -1 | awk '{print $1}'
@@ -55,6 +57,8 @@ ha() {
     link)    ha-link "$@" ;;
     invoke)  ha-invoke "$@" ;;
     *)
+      echo "ha $HA_VERSION"
+      echo ""
       cat <<'EOF'
 Usage: ha <command> [args]
 
