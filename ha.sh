@@ -3,7 +3,7 @@
 # Usage: source this file from your shell rc
 # Compatible with bash and zsh
 
-HA_VERSION="2026.02.10"
+HA_VERSION="2026.02.13"
 
 # Internal: get base worktree path
 _ha_base_path() {
@@ -257,7 +257,7 @@ ha-home() {
 ha-use() {
   _ha_is_worktree || { echo "Error: Not in a worktree" >&2; return 1; }
 
-  git -C "$(_ha_base_path)" checkout --detach "$(git rev-parse HEAD)"
+  git -C "$(_ha_base_path)" -c advice.detachedHead=false switch --detach "$(git rev-parse HEAD)"
 }
 
 # Copy file/dir from base to current worktree
