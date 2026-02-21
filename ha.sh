@@ -22,7 +22,7 @@ _ha_is_worktree() {
 
 # Internal: get remote HEAD (e.g., origin/main)
 _ha_remote_head() {
-  git symbolic-ref refs/remotes/origin/HEAD
+  git symbolic-ref refs/remotes/upstream/HEAD 2>/dev/null || git symbolic-ref refs/remotes/origin/HEAD
 }
 
 # Internal: fetch latest from remote
