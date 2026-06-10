@@ -324,12 +324,41 @@ ha-gone() {
     return 0
   fi
 
+  local remote_head
+  remote_head="$(_ha_remote_head)" || return 1
+
+  # Only delete gone branches whose tip is reachable from remote HEAD.
+  # Branches with unmerged local commits are reported as skipped.
+  local merged_branches
+  merged_branches=$(git branch --merged "$remote_head" --format='%(refname:short)')
+
+  local mergeable=() skipped=()
+  local branch
+  while IFS= read -r branch; do
+    if grep -qxF "$branch" <<< "$merged_branches"; then
+      mergeable+=("$branch")
+    else
+      skipped+=("$branch")
+    fi
+  done <<< "$gone_branches"
+
+  if (( ${#skipped[@]} > 0 )); then
+    echo "Skipped (unmerged commits):"
+    printf '  %s\n' "${skipped[@]}"
+    echo ""
+  fi
+
+  if (( ${#mergeable[@]} == 0 )); then
+    echo "No deletable gone branches found"
+    return 0
+  fi
+
   echo "Gone branches:"
-  echo "$gone_branches"
+  printf '%s\n' "${mergeable[@]}"
   echo ""
 
-  local branch worktree_path
-  while IFS= read -r branch; do
+  local worktree_path
+  for branch in "${mergeable[@]}"; do
     # Resolve worktree path from branch name
     worktree_path=$(git worktree list | grep -F "[$branch]" | awk '{print $1}')
 
@@ -340,7 +369,7 @@ ha-gone() {
 
     echo "Deleting branch: $branch"
     git branch -d "$branch"
-  done <<< "$gone_branches"
+  done
 }
 
 # Run hook manually (in subshell)
