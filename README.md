@@ -126,6 +126,36 @@ source /path/to/ha.sh
 - git
 - fzf (for `ha cd`)
 
+## AI Agent Skill
+
+`skills/ha/SKILL.md` is an [Agent Skill](https://agentskills.io) that teaches AI
+coding agents (Claude Code, etc.) ha's conventions — the base-vs-worktree model, the
+`base@branch` path convention, the commands, and `.ha/hooks/` — so they operate
+correctly in a repo managed by ha.
+
+Install it into your personal skills dir so it applies in every project where you use
+ha. The default is `~/.claude/skills/`; if you set `CLAUDE_CONFIG_DIR`, use
+`$CLAUDE_CONFIG_DIR/skills/` instead.
+
+**If you installed ha via Sheldon**, the repo is already cloned locally — no need to
+clone it again. Symlink the skill from there (run `sheldon lock --update` first to
+pull the latest):
+
+```bash
+mkdir -p ~/.claude/skills
+ln -s "${XDG_DATA_HOME:-$HOME/.local/share}/sheldon/repos/github.com/kawarimidoll/ha/skills/ha" ~/.claude/skills/ha
+```
+
+**If you cloned the repo manually**, from the repo root:
+
+```bash
+mkdir -p ~/.claude/skills
+ln -s "$PWD/skills/ha" ~/.claude/skills/ha   # or: cp -r skills/ha ~/.claude/skills/ha
+```
+
+A symlink keeps the skill in sync as the repo updates. It activates automatically
+when an agent works with worktrees or ha commands.
+
 ## Similar Projects
 
 - https://github.com/k1LoW/git-wt
