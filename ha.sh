@@ -177,10 +177,30 @@ ha-mv() {
   local current_path="$(git rev-parse --show-toplevel)"
   local new_path="$(_ha_worktree_path "$new_name")"
 
+  # git worktree move leaves .git/worktrees/<id> under the old name, so rename
+  # it here. Resolve the ids first: rev-parse loses its footing after the move.
+  local wt_dir="$(git rev-parse --git-common-dir)/worktrees"
+  local old_id="$(basename "$(git rev-parse --git-dir)")"
+  local new_id="$(basename "$new_path")"
+
+  # A stale id from a pre-fix rename can squat on new_id while the branch and
+  # the path are both free, so nothing below would catch it. Bail out before
+  # mutating anything.
+  if [[ "$old_id" != "$new_id" && -e "$wt_dir/$new_id" ]]; then
+    echo "Error: worktree admin dir '$new_id' is already in use" >&2
+    return 1
+  fi
+
   HA_BRANCH="$new_name" _ha_exec_hook pre-mv || return 1
 
   git branch -m "$new_name" || return 1
   git worktree move "$current_path" "$new_path" || return 1
+
+  # Equal ids mean the move already landed the admin dir on the right name.
+  if [[ "$old_id" != "$new_id" ]]; then
+    mv "$wt_dir/$old_id" "$wt_dir/$new_id" || return 1
+    echo "gitdir: $wt_dir/$new_id" > "$new_path/.git" || return 1
+  fi
 
   cd "$new_path" || return 1
 }
