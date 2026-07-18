@@ -126,6 +126,18 @@ source /path/to/ha.sh
 - git
 - fzf (for `ha cd`)
 
+## Development
+
+Run the tests with:
+
+```bash
+bash test.sh
+```
+
+`test.sh` exercises `ha mv` against a throwaway repo, covering the worktree
+rename, the already-reconciled id, and the admin-dir id collision. It needs
+only bash and git — no test framework.
+
 ## AI Agent Skill
 
 `skills/ha/SKILL.md` is an [Agent Skill](https://agentskills.io) that teaches AI
