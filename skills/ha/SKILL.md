@@ -40,6 +40,7 @@ is about *awareness*, not driving `ha` for the user.
 |---|---|---|
 | `ha new [name]` | Create worktree + branch from remote HEAD (default `wip-$RANDOM`) | yes → worktree |
 | `ha get <branch>` | Check out a remote branch as a worktree | yes → worktree |
+| `ha pr <num\|url>` | Check out a GitHub PR as a worktree (`gh`; forks too) | yes → worktree |
 | `ha extract` | Move current base branch into a worktree | yes → worktree |
 | `ha mv <name>` | Rename current worktree + branch | yes → worktree |
 | `ha del [-f]` | Delete current worktree + branch | yes → base |
@@ -78,13 +79,13 @@ is about *awareness*, not driving `ha` for the user.
   source /abs/path/to/ha.sh; ha ls
   ```
 - **Prefer raw `git worktree` for direct manipulation.** Reserve invoking `ha` for
-  `ha new` / `ha get`, where the hook side effects matter (see below). Those side
-  effects all run inside the single `ha new`/`ha get` call, so they work fine — you
-  just are not left inside the new worktree afterward.
+  `ha new` / `ha get` / `ha pr`, where the hook side effects matter (see below).
+  Those side effects all run inside the single `ha new`/`ha get`/`ha pr` call, so
+  they work fine — you just are not left inside the new worktree afterward.
 - **If you create a worktree without `ha`, put it at `<base>@<branch>`.** A plain
   `git worktree add <base>@<branch> <branch>` keeps `ha ls`/`gone`/`del` recognizing
   it; a path off-convention desyncs them. Note that `.ha/hooks/` will *not* run, so
-  prefer `ha new`/`ha get` when a project relies on them.
+  prefer `ha new`/`ha get`/`ha pr` when a project relies on them.
 
 ## Hooks
 
@@ -95,6 +96,7 @@ around each command, passing the target branch as `$HA_BRANCH`.
 |---|---|
 | `pre-new` / `post-new` | around `ha new` |
 | `pre-get` / `post-get` | around `ha get` |
+| `pre-pr` / `post-pr` | around `ha pr` |
 | `pre-extract` / `post-extract` | around `ha extract` |
 | `pre-del` | before `ha del` |
 | `pre-mv` | before `ha mv` |

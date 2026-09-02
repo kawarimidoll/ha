@@ -8,6 +8,7 @@ Git Worktree Manager - Simple shell functions for managing git worktrees.
 |---------|-------------|
 | `ha new [name]` | Create new worktree + branch (default: wip-$RANDOM) |
 | `ha get <branch>` | Checkout remote branch as worktree |
+| `ha pr <num\|url>` | Checkout GitHub PR as worktree (via `gh`) |
 | `ha extract` | Extract current branch to worktree |
 | `ha mv <name>` | Rename current worktree + branch |
 | `ha del [-f]` | Delete current worktree + branch |
@@ -68,6 +69,8 @@ Per-repository hooks in `.ha/hooks/`:
 | `post-new` | After `ha new` |
 | `pre-get` | Before `ha get` |
 | `post-get` | After `ha get` |
+| `pre-pr` | Before `ha pr` |
+| `post-pr` | After `ha pr` |
 | `pre-extract` | Before `ha extract` |
 | `post-extract` | After `ha extract` |
 | `pre-del` | Before `ha del` |
@@ -77,6 +80,9 @@ Pre-hooks can abort the command by exiting with non-zero status.
 
 Hooks receive `HA_BRANCH` environment variable with the target branch name.
 (`ha invoke` does not set this automatically)
+
+Hooks can reuse each other: a `post-pr` containing `ha invoke post-get` runs the
+same setup, with `HA_BRANCH` inherited.
 
 ```bash
 # .ha/hooks/pre-new
@@ -125,6 +131,7 @@ source /path/to/ha.sh
 - bash or zsh
 - git
 - fzf (for `ha cd`)
+- gh 2.98.0+ (for `ha pr`, which needs `gh pr checkout --worktree`)
 
 ## Development
 

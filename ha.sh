@@ -45,6 +45,7 @@ ha() {
   case "$cmd" in
     new)     ha-new "$@" ;;
     get)     ha-get "$@" ;;
+    pr)      ha-pr "$@" ;;
     extract) ha-extract "$@" ;;
     mv)      ha-mv "$@" ;;
     del)     ha-del "$@" ;;
@@ -65,6 +66,7 @@ Usage: ha <command> [args]
 Commands:
   new [name]    Create new worktree + branch and cd (default: wip-$RANDOM)
   get <branch>  Checkout remote branch as worktree
+  pr <num|url>  Checkout GitHub PR as worktree (needs gh)
   extract       Extract current branch to worktree
   mv <name>     Rename current worktree + branch
   del [-f]      Delete current worktree + branch
@@ -112,6 +114,32 @@ ha-get() {
   cd "$worktree_path" || return 1
 
   HA_BRANCH="$branch_name" _ha_exec_hook post-get
+}
+
+# Checkout GitHub PR as worktree (number, URL, or branch)
+ha-pr() {
+  local pr="$1"
+  if [[ -z "$pr" ]]; then
+    echo "Usage: ha pr <number|url>" >&2
+    return 1
+  fi
+
+  # gh fetches the PR ref itself, hence no _ha_fetch here.
+  # LIMITATION: gh names the local branch after the head ref, except on a fork PR
+  # whose head ref is the default branch -- there it prefixes the fork owner, so
+  # the worktree lands at base@<head-ref> while the branch is <owner>/<head-ref>.
+  local branch_name
+  branch_name="$(gh pr view "$pr" --json headRefName --jq .headRefName)" || return 1
+
+  local worktree_path="$(_ha_worktree_path "$branch_name")"
+
+  HA_BRANCH="$branch_name" _ha_exec_hook pre-pr || return 1
+
+  gh pr checkout "$pr" --worktree "$worktree_path" || return 1
+
+  cd "$worktree_path" || return 1
+
+  HA_BRANCH="$branch_name" _ha_exec_hook post-pr
 }
 
 # Extract current branch to worktree (from base only)
@@ -416,6 +444,7 @@ if [[ -n "$ZSH_VERSION" ]]; then
     commands=(
       'new:Create new worktree + branch'
       'get:Checkout remote branch as worktree'
+      'pr:Checkout GitHub PR as worktree'
       'extract:Extract current branch to worktree'
       'mv:Rename current worktree + branch'
       'del:Delete current worktree + branch'
@@ -435,7 +464,7 @@ if [[ -n "$ZSH_VERSION" ]]; then
 elif [[ -n "$BASH_VERSION" ]]; then
   _ha() {
     local cur="${COMP_WORDS[COMP_CWORD]}"
-    local commands="new get extract mv del cd home use gone ls copy link invoke"
+    local commands="new get pr extract mv del cd home use gone ls copy link invoke"
     COMPREPLY=($(compgen -W "$commands" -- "$cur"))
   }
   complete -F _ha ha
