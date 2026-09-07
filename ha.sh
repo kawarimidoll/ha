@@ -364,8 +364,12 @@ ha-link() {
 ha-gone() {
   _ha_fetch || return 1
 
+  # The base worktree cannot be removed, so its branch is never a candidate.
+  local base_branch
+  base_branch=$(git -C "$(_ha_base_path)" branch --show-current)
+
   local gone_branches
-  gone_branches=$(git branch -vv | cut -c3- | awk '/: gone]/{print $1}')
+  gone_branches=$(git branch -vv | cut -c3- | awk -v base="$base_branch" '/: gone]/ && $1 != base {print $1}')
 
   if [[ -z "$gone_branches" ]]; then
     echo "No gone branches found"
